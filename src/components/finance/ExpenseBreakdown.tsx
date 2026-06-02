@@ -25,7 +25,7 @@ const data = [
   { name: "Phone / WiFi", value: 2250 },
 ];
 
-const COLORS = ["#8b5cf6", "#6366f1", "#a78bfa", "#7c3aed", "#c4b5fd", "#ddd6fe"];
+const COLORS = ["#D7DF23", "#063F34", "#2A292A", "#D1D3D4", "#6b7280", "#9ca3af"];
 
 export default function ExpenseBreakdown() {
   return (
@@ -44,12 +44,14 @@ export default function ExpenseBreakdown() {
           />
           <Tooltip
             contentStyle={{
-              background: "#0d0d1a",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 8,
+              backgroundColor: "#2A292A",
+              border: "1px solid rgba(215,223,35,0.2)",
+              borderRadius: "8px",
               fontSize: 12,
             }}
             formatter={(v) => fmt(Number(v))}
+            labelStyle={{ color: "#D1D3D4" }}
+            itemStyle={{ color: "#D7DF23" }}
             cursor={{ fill: "rgba(255,255,255,0.03)" }}
           />
           <Bar dataKey="value" radius={[0, 4, 4, 0]}>

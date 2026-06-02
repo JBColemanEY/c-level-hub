@@ -53,7 +53,7 @@ const clients: Client[] = [
 const riskConfig: Record<RiskLevel, { label: string; classes: string } | null> = {
   ending: { label: "Ending", classes: "bg-red-500/20 text-red-300 border-red-500/30" },
   risk: { label: "Churn Risk", classes: "bg-amber-500/15 text-amber-400 border-amber-500/25" },
-  anchor: { label: "Anchor", classes: "bg-violet-500/15 text-violet-400 border-violet-500/25" },
+  anchor: { label: "Anchor", classes: "bg-[#D7DF23]/15 text-[#D7DF23] border-[#D7DF23]/25" },
   stable: null,
   none: null,
 };
@@ -98,7 +98,7 @@ export default function ClientRetainerBoard() {
               : client.risk === "risk"
               ? "bg-amber-500/[0.04] border-amber-500/15 hover:border-amber-500/25 transition-colors"
               : client.risk === "anchor"
-              ? "bg-violet-500/[0.04] border-violet-500/15 hover:border-violet-500/25 transition-colors"
+              ? "bg-[#D7DF23]/[0.04] border-[#D7DF23]/15 hover:border-[#D7DF23]/25 transition-colors"
               : "bg-white/[0.02] border-white/[0.06] hover:border-white/10 transition-colors";
 
           return (
@@ -148,7 +148,7 @@ export default function ClientRetainerBoard() {
         </div>
         <div>
           <span className="text-white/40">Anchor clients</span>
-          <span className="text-violet-400 font-semibold ml-2">Ergonomicsdirect + Chin & Partners</span>
+          <span className="text-[#D7DF23] font-semibold ml-2">Ergonomicsdirect + Chin &amp; Partners</span>
         </div>
         <div>
           <span className="text-white/40">⚠ At risk</span>

@@ -32,29 +32,30 @@ export default function RevExpChart() {
       <p className="text-white/60 text-xs uppercase tracking-wider mb-4">Total Income vs Expenses — Jan–May 2026</p>
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#D1D3D4" strokeOpacity={0.1} />
           <XAxis
             dataKey="month"
-            tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+            tick={{ fill: "#D1D3D4", fontSize: 11, opacity: 0.4 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={(v) => fmt(Number(v))}
-            tick={{ fill: "rgba(255,255,255,0.25)", fontSize: 10 }}
+            tick={{ fill: "#D1D3D4", fontSize: 10, opacity: 0.4 }}
             axisLine={false}
             tickLine={false}
             width={54}
           />
           <Tooltip
             contentStyle={{
-              background: "#0d0d1a",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 8,
+              backgroundColor: "#2A292A",
+              border: "1px solid rgba(215,223,35,0.2)",
+              borderRadius: "8px",
               fontSize: 12,
             }}
             formatter={(v) => fmt(Number(v))}
-            labelStyle={{ color: "rgba(255,255,255,0.6)" }}
+            labelStyle={{ color: "#D1D3D4" }}
+            itemStyle={{ color: "#D7DF23" }}
             cursor={{ stroke: "rgba(255,255,255,0.06)" }}
           />
           <Legend
@@ -64,18 +65,18 @@ export default function RevExpChart() {
             type="monotone"
             dataKey="revenue"
             name="Total Income"
-            stroke="#8b5cf6"
+            stroke="#D7DF23"
             strokeWidth={2}
-            dot={{ r: 4, fill: "#8b5cf6", strokeWidth: 0 }}
+            dot={{ r: 4, fill: "#D7DF23", strokeWidth: 0 }}
             activeDot={{ r: 6 }}
           />
           <Line
             type="monotone"
             dataKey="expenses"
             name="Expenses"
-            stroke="#f97316"
+            stroke="#ef4444"
             strokeWidth={2}
-            dot={{ r: 4, fill: "#f97316", strokeWidth: 0 }}
+            dot={{ r: 4, fill: "#ef4444", strokeWidth: 0 }}
             activeDot={{ r: 6 }}
           />
           <Line

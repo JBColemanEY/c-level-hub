@@ -10,7 +10,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import KPICard from "@/components/finance/KPICard";
-import AIAdvisor from "@/components/finance/AIAdvisor";
+import IntelligencePanel from "@/components/IntelligencePanel";
 import RevExpChart from "@/components/finance/RevExpChart";
 import ProfitBarChart from "@/components/finance/ProfitBarChart";
 import ForecastVsActual from "@/components/finance/ForecastVsActual";
@@ -20,7 +20,6 @@ import CashFlowCalendar from "@/components/finance/CashFlowCalendar";
 import ExpenseBreakdown from "@/components/finance/ExpenseBreakdown";
 import BreakEven from "@/components/finance/BreakEven";
 import ChurnAnalysis from "@/components/finance/ChurnAnalysis";
-import { FinanceDashboardData } from "@/lib/xero";
 
 function fmt(n: number) {
   if (Math.abs(n) >= 1_000_000) return `R${(n / 1_000_000).toFixed(2)}M`;
@@ -29,7 +28,8 @@ function fmt(n: number) {
 }
 
 // Hardcoded comprehensive dataset — Entity Y, May 2026
-const STATIC_DATA: FinanceDashboardData = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const STATIC_DATA: any = {
   org_name: "Entity Y",
   currency: "ZAR",
   last_refreshed: "2026-06-02T08:00:00Z",
@@ -99,20 +99,6 @@ export default function FinancePage() {
   }
 
   const d = STATIC_DATA;
-
-  // Rich AI context string with all corrected figures
-  const enrichedData: FinanceDashboardData = {
-    ...d,
-    org_name: `Entity Y — May 2026 Financial Summary:
-INCOME: May retainer revenue R367,764 (-6.6% MoM vs Apr R393,988). May total income R501,116 (includes VAT refunds R75,429 + media pass-through R51,773 + client refunds R6,150). May expenses R393,060. May NET PROFIT: R108,056 (21.6% margin on total income).
-YTD 2026 P&L: Jan profit R2,852 | Feb R24,785 | Mar R96,463 | Apr R23,493 | May R108,056. YTD retainer revenue R1,723,321 vs YTD forecast target R2,030,000 — BEHIND by R306,679 (-15.1%). Annual target R5,030,000, 34.2% achieved.
-BALANCE SHEET: Cash R1.24M | Total assets R2.53M | Total liabilities R2.11M | Net equity R414,725. Current ratio 0.60 WARNING — current liabilities R2.14M exceed current assets R1.28M by R859K.
-RECEIVABLES: Total R1.355M | 96% overdue — 0-30 days R108,898 | 31-60 days R67,324 | 61-90 days R50,017 | 90+ days R1,020,086. PrideBet alone R198,639 (3 invoices overdue).
-MRR: 19 active retainers = R359,764/month base. Plus short-term: The Steam Bar R25,998 (ENDING NOW — 4mo from Jan), Flying Brick R16,998, UDARKIE R14,998, Robin Sprong R13,999. BREAK-EVEN: fixed costs ~R343,858/mo — buffer only R15,906 (4.4%). Losing 1 mid-size client goes negative.
-CHURN: 2025 MRR R381,909 → 2026 R359,764 (-R22,145/mo). Churned: Luxity R41K, Piffany R25K, African Jacquard R15K, ECape Moringa R10K + 5 others. AT-RISK: 9 clients on 3-4 month contracts = R196,949 MRR at risk. Key anchors: Ergonomicsdirect (24-month) and Chin & Partners (21-month).
-MAY BUDGET VARIANCE: Paid media contractors under budget by R6,210. Management fees R26,828 and commissions R8,130 were unbudgeted overages. Software R27,834.
-LTV metrics: avg customer value R17,131/month | avg lifespan 6.9 months | LTV R118,603.`,
-  };
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
@@ -184,13 +170,13 @@ LTV metrics: avg customer value R17,131/month | avg lifespan 6.9 months | LTV R1
         {/* ── Section 2: KPI Strip ── */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
           {/* Cash Balance */}
-          <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4">
+          <div className="bg-[#D7DF23]/10 border border-[#D7DF23]/30 rounded-xl p-4">
             <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Cash Balance</p>
             <div className="flex items-end gap-1">
-              <DollarSign size={14} className="text-violet-400 mb-0.5" />
+              <DollarSign size={14} className="text-[#D7DF23] mb-0.5" />
               <p className="text-white text-2xl font-semibold leading-none">R1.24M</p>
             </div>
-            <p className="text-violet-300/70 text-xs mt-1.5">Available liquidity</p>
+            <p className="text-[#D7DF23]/70 text-xs mt-1.5">Available liquidity</p>
           </div>
 
           {/* Monthly Revenue */}
@@ -291,9 +277,11 @@ LTV metrics: avg customer value R17,131/month | avg lifespan 6.9 months | LTV R1
         </div>
 
         {/* ── Section 7: AI Financial Advisor (full width) ── */}
-        <div style={{ height: 580 }}>
-          <AIAdvisor financialData={enrichedData} />
-        </div>
+        <IntelligencePanel
+          module="finance"
+          initialQuestion="Analyse Entity Y's financial position. What are the top 3 priorities for the finance team this week? Include specific numbers and recommended actions."
+          quickQuestions={["What's our cash runway?", "Which invoices are most at risk?", "How can we improve our margin?", "When will we hit annual target?"]}
+        />
       </div>
     </div>
   );

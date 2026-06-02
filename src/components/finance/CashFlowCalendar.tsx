@@ -53,7 +53,7 @@ export default function CashFlowCalendar() {
           <p className="text-white/40 text-xs mt-0.5">Expected retainer receipts this month</p>
         </div>
         <div className="text-right">
-          <p className="text-violet-400 font-semibold text-lg">{fmtK(total)}</p>
+          <p className="text-[#D7DF23] font-semibold text-lg">{fmtK(total)}</p>
           <p className="text-white/40 text-xs">expected this month</p>
         </div>
       </div>
@@ -68,8 +68,8 @@ export default function CashFlowCalendar() {
             <div key={group.date} className="flex items-start gap-3">
               {/* Date pin */}
               <div className="w-10 shrink-0 text-center">
-                <div className="bg-violet-500/20 border border-violet-500/30 rounded-lg py-1.5">
-                  <p className="text-violet-300 text-xs font-bold">{group.date}</p>
+                <div className="bg-[#D7DF23]/20 border border-[#D7DF23]/30 rounded-lg py-1.5">
+                  <p className="text-[#D7DF23] text-xs font-bold">{group.date}</p>
                 </div>
               </div>
 
@@ -81,7 +81,7 @@ export default function CashFlowCalendar() {
                 </div>
                 <div className="w-full bg-white/[0.05] rounded-full h-1.5">
                   <div
-                    className="h-1.5 rounded-full bg-gradient-to-r from-violet-600 to-violet-400"
+                    className="h-1.5 rounded-full bg-gradient-to-r from-[#063F34] to-[#D7DF23]"
                     style={{ width: `${barPct}%` }}
                   />
                 </div>

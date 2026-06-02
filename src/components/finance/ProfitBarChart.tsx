@@ -38,13 +38,13 @@ export default function ProfitBarChart() {
         <ComposedChart data={data} barCategoryGap="35%">
           <XAxis
             dataKey="month"
-            tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+            tick={{ fill: "#D1D3D4", fontSize: 11, opacity: 0.4 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={(v) => fmt(Number(v))}
-            tick={{ fill: "rgba(255,255,255,0.25)", fontSize: 10 }}
+            tick={{ fill: "#D1D3D4", fontSize: 10, opacity: 0.4 }}
             axisLine={false}
             tickLine={false}
             width={54}
@@ -52,25 +52,26 @@ export default function ProfitBarChart() {
           <ReferenceLine y={0} stroke="rgba(255,255,255,0.12)" />
           <Tooltip
             contentStyle={{
-              background: "#0d0d1a",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 8,
+              backgroundColor: "#2A292A",
+              border: "1px solid rgba(215,223,35,0.2)",
+              borderRadius: "8px",
               fontSize: 12,
             }}
             formatter={(v) => fmt(Number(v))}
-            labelStyle={{ color: "rgba(255,255,255,0.6)" }}
+            labelStyle={{ color: "#D1D3D4" }}
+            itemStyle={{ color: "#D7DF23" }}
             cursor={{ fill: "rgba(255,255,255,0.03)" }}
           />
           <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.4)", paddingTop: 8 }} />
-          <Bar dataKey="profit" name="Actual Profit" fill="#34d399" radius={[4, 4, 0, 0]} />
+          <Bar dataKey="profit" name="Actual Profit" fill="#D7DF23" radius={[4, 4, 0, 0]} />
           <Line
             type="monotone"
             dataKey="forecast"
             name="Forecast Profit"
-            stroke="#a78bfa"
+            stroke="#063F34"
             strokeWidth={1.5}
             strokeDasharray="4 3"
-            dot={{ r: 3, fill: "#a78bfa", strokeWidth: 0 }}
+            dot={{ r: 3, fill: "#063F34", strokeWidth: 0 }}
           />
         </ComposedChart>
       </ResponsiveContainer>

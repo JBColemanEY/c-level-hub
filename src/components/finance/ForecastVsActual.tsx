@@ -44,31 +44,32 @@ export default function ForecastVsActual() {
         <BarChart data={data} barCategoryGap="25%" barGap={3}>
           <XAxis
             dataKey="month"
-            tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+            tick={{ fill: "#D1D3D4", fontSize: 11, opacity: 0.4 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={(v) => fmt(Number(v))}
-            tick={{ fill: "rgba(255,255,255,0.25)", fontSize: 10 }}
+            tick={{ fill: "#D1D3D4", fontSize: 10, opacity: 0.4 }}
             axisLine={false}
             tickLine={false}
             width={54}
           />
           <Tooltip
             contentStyle={{
-              background: "#0d0d1a",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 8,
+              backgroundColor: "#2A292A",
+              border: "1px solid rgba(215,223,35,0.2)",
+              borderRadius: "8px",
               fontSize: 12,
             }}
             formatter={(v) => fmt(Number(v))}
-            labelStyle={{ color: "rgba(255,255,255,0.6)" }}
+            labelStyle={{ color: "#D1D3D4" }}
+            itemStyle={{ color: "#D7DF23" }}
             cursor={{ fill: "rgba(255,255,255,0.03)" }}
           />
           <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.4)", paddingTop: 8 }} />
           <Bar dataKey="forecast" name="Forecast" fill="rgba(255,255,255,0.12)" radius={[3, 3, 0, 0]} />
-          <Bar dataKey="actual" name="Actual" fill="#8b5cf6" radius={[3, 3, 0, 0]} />
+          <Bar dataKey="actual" name="Actual" fill="#D7DF23" radius={[3, 3, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
 
@@ -80,7 +81,7 @@ export default function ForecastVsActual() {
         </div>
         <div className="w-full bg-white/[0.06] rounded-full h-2">
           <div
-            className="bg-violet-500 h-2 rounded-full relative"
+            className="bg-[#D7DF23] h-2 rounded-full relative"
             style={{ width: `${PCT_OF_ANNUAL}%` }}
           />
         </div>

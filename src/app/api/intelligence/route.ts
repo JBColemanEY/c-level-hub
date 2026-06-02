@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { getSheetsContext } from "@/lib/sheets-context";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -54,6 +55,15 @@ export async function POST(req: NextRequest) {
   try {
     const { module, question, history = [] } = await req.json();
 
+    // Fetch live Sheets context (non-blocking — falls back gracefully)
+    let sheetsContext = "";
+    try {
+      const ctx = await getSheetsContext();
+      sheetsContext = ctx.rawSummary;
+    } catch {
+      sheetsContext = "";
+    }
+
     const systemPrompt = `You are the Chief Intelligence Officer for Entity Y, a South African performance marketing agency. You have real-time access to financial, operational, and client data across all departments.
 
 Your role:
@@ -64,9 +74,12 @@ Your role:
 - Format responses concisely with bullet points where helpful
 - Currency is ZAR (VAT-exclusive). Use R prefix. Format: R1.24M, R360K, R15.9K
 - Today is ${new Date().toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+- When live sheet data and static context differ, ALWAYS prefer the live sheet data
 
-Business context:
+Static business context (use as fallback if live data unavailable):
 ${JSON.stringify(BUSINESS_CONTEXT, null, 2)}
+
+${sheetsContext ? `Live data from Google Sheets (authoritative — use this over static context):\n${sheetsContext}` : ""}
 
 Module context: ${module || "Overview / Cross-department"}`;
 

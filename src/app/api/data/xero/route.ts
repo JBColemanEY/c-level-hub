@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { xero, loadTokens, getTokens } from "@/lib/xero-oauth";
+import { xero, getValidTokens } from "@/lib/xero-oauth";
 
 export async function GET() {
-  // Try memory first, fall back to Supabase
-  let tokens = getTokens();
-  if (!tokens) {
-    tokens = await loadTokens();
-  }
+  const tokens = await getValidTokens();
 
   if (!tokens) {
     return NextResponse.json({ error: "Not authenticated with Xero", authUrl: "/api/auth/xero" }, { status: 401 });

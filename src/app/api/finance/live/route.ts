@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { xero, loadTokens, getTokens } from "@/lib/xero-oauth";
+import { xero, getValidTokens } from "@/lib/xero-oauth";
 import { getSheetData } from "@/lib/google-sheets";
 
 // ── Fallback hardcoded data ──────────────────────────────────────────────────
@@ -225,8 +225,7 @@ export async function GET() {
   let currentMonthProfit = FALLBACK.mayProfit;
 
   try {
-    let tokens = getTokens();
-    if (!tokens) tokens = await loadTokens();
+    const tokens = await getValidTokens();
 
     if (tokens) {
       await xero.setTokenSet(tokens as any);

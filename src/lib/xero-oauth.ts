@@ -55,3 +55,28 @@ export function setTokens(tokens: Record<string, unknown>) {
 export function getTokens() {
   return memoryTokens;
 }
+
+export async function getValidTokens(): Promise<Record<string, unknown> | null> {
+  let tokens = getTokens();
+  if (!tokens) tokens = await loadTokens();
+  if (!tokens) return null;
+
+  try {
+    const expiresAt = tokens.expires_at as number;
+    const nowPlusFive = Math.floor(Date.now() / 1000) + 300;
+
+    if (expiresAt && expiresAt < nowPlusFive) {
+      await xero.setTokenSet(tokens as any);
+      const newTokenSet = await xero.refreshToken();
+      const newTokens = newTokenSet as unknown as Record<string, unknown>;
+      memoryTokens = newTokens;
+      await saveTokens(newTokens);
+      return newTokens;
+    }
+
+    return tokens;
+  } catch (error) {
+    console.error("Token refresh failed:", error);
+    return tokens;
+  }
+}

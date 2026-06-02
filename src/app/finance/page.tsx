@@ -3,7 +3,6 @@
 import { useState } from "react";
 import {
   RefreshCw,
-  TrendingDown,
   AlertTriangle,
   TrendingUp,
   DollarSign,
@@ -14,10 +13,13 @@ import KPICard from "@/components/finance/KPICard";
 import AIAdvisor from "@/components/finance/AIAdvisor";
 import RevExpChart from "@/components/finance/RevExpChart";
 import ProfitBarChart from "@/components/finance/ProfitBarChart";
+import ForecastVsActual from "@/components/finance/ForecastVsActual";
 import ReceivablesPanel from "@/components/finance/ReceivablesPanel";
 import ClientRetainerBoard from "@/components/finance/ClientRetainerBoard";
 import CashFlowCalendar from "@/components/finance/CashFlowCalendar";
 import ExpenseBreakdown from "@/components/finance/ExpenseBreakdown";
+import BreakEven from "@/components/finance/BreakEven";
+import ChurnAnalysis from "@/components/finance/ChurnAnalysis";
 import { FinanceDashboardData } from "@/lib/xero";
 
 function fmt(n: number) {
@@ -42,20 +44,33 @@ const STATIC_DATA: FinanceDashboardData = {
   },
   pnl: {
     period: { start_date: "2026-05-01", end_date: "2026-05-31" },
-    total_income: 367764,
+    // May total income includes: retainer R367,764 + VAT R75,429 + media R51,773 + refunds R6,150 = R501,116
+    total_income: 501116,
     total_expenses: 393060,
-    gross_profit: 367764,
-    net_profit: -25296,
+    gross_profit: 501116,
+    net_profit: 108056,
     income_accounts: [
       { account_name: "Retainer Revenue", current_balance: 367764, comparison_balance: 393988 },
+      { account_name: "VAT Refunds", current_balance: 75429, comparison_balance: 0 },
+      { account_name: "Media Pass-through", current_balance: 51773, comparison_balance: 0 },
+      { account_name: "Client Refunds", current_balance: 6150, comparison_balance: 0 },
     ],
     expense_accounts: [
-      { account_name: "Staff / Contractors", current_balance: 279740, comparison_balance: 279740 },
-      { account_name: "Software", current_balance: 26000, comparison_balance: 26000 },
-      { account_name: "Occupancy", current_balance: 23004, comparison_balance: 23004 },
-      { account_name: "General", current_balance: 11000, comparison_balance: 11000 },
-      { account_name: "Marketing", current_balance: 7000, comparison_balance: 7000 },
-      { account_name: "Phone / WiFi", current_balance: 2250, comparison_balance: 2250 },
+      { account_name: "Salaries", current_balance: 90000, comparison_balance: 90000 },
+      { account_name: "Paid Media Contractors", current_balance: 41290, comparison_balance: 47500 },
+      { account_name: "Content Contractors", current_balance: 40000, comparison_balance: 40000 },
+      { account_name: "Email Contractors", current_balance: 28000, comparison_balance: 28000 },
+      { account_name: "Management Fees", current_balance: 26828, comparison_balance: 0 },
+      { account_name: "Software", current_balance: 27834, comparison_balance: 26000 },
+      { account_name: "Media Spend (pass-through)", current_balance: 55103, comparison_balance: 0 },
+      { account_name: "Sales Contractors", current_balance: 15000, comparison_balance: 15000 },
+      { account_name: "Designers", current_balance: 15000, comparison_balance: 15000 },
+      { account_name: "Commissions", current_balance: 8130, comparison_balance: 0 },
+      { account_name: "Insurance", current_balance: 4631, comparison_balance: 4631 },
+      { account_name: "Medical Aid", current_balance: 2240, comparison_balance: 2240 },
+      { account_name: "Accountant", current_balance: 7000, comparison_balance: 7000 },
+      { account_name: "Entertainment", current_balance: 3000, comparison_balance: 3000 },
+      { account_name: "Office / Other", current_balance: 4000, comparison_balance: 4000 },
     ],
   },
   cash: {
@@ -67,10 +82,12 @@ const STATIC_DATA: FinanceDashboardData = {
   },
 };
 
-const YTD_REVENUE = 263004 + 318764 + 379801 + 393988 + 367764; // 1,723,321
+// YTD figures (retainer revenue only for consistency with forecast comparison)
+const YTD_RETAINER = 263004 + 318764 + 379801 + 393988 + 367764; // 1,723,321
 const APR_REVENUE = 393988;
 const MAY_REVENUE = 367764;
 const MOM_CHANGE = ((MAY_REVENUE - APR_REVENUE) / APR_REVENUE) * 100; // -6.6%
+const YTD_TARGET = 2030000;
 
 export default function FinancePage() {
   const [refreshing, setRefreshing] = useState(false);
@@ -83,10 +100,18 @@ export default function FinancePage() {
 
   const d = STATIC_DATA;
 
-  // AI advisor gets a rich context string baked in
+  // Rich AI context string with all corrected figures
   const enrichedData: FinanceDashboardData = {
     ...d,
-    org_name: "Entity Y — May 2026 | Cash: R1.24M | May Rev: R367K (-6.6% MoM) | May Net Loss: -R25K | YTD Rev: R1.72M | Receivables: R1.36M (96% overdue, R1.25M) | Working capital: R384K | Current ratio: 0.60 WARNING | MRR base: R359K from 19 active retainers | PrideBet: R198K outstanding, payment issues | Dec 2025 operating margin: 27%",
+    org_name: `Entity Y — May 2026 Financial Summary:
+INCOME: May retainer revenue R367,764 (-6.6% MoM vs Apr R393,988). May total income R501,116 (includes VAT refunds R75,429 + media pass-through R51,773 + client refunds R6,150). May expenses R393,060. May NET PROFIT: R108,056 (21.6% margin on total income).
+YTD 2026 P&L: Jan profit R2,852 | Feb R24,785 | Mar R96,463 | Apr R23,493 | May R108,056. YTD retainer revenue R1,723,321 vs YTD forecast target R2,030,000 — BEHIND by R306,679 (-15.1%). Annual target R5,030,000, 34.2% achieved.
+BALANCE SHEET: Cash R1.24M | Total assets R2.53M | Total liabilities R2.11M | Net equity R414,725. Current ratio 0.60 WARNING — current liabilities R2.14M exceed current assets R1.28M by R859K.
+RECEIVABLES: Total R1.355M | 96% overdue — 0-30 days R108,898 | 31-60 days R67,324 | 61-90 days R50,017 | 90+ days R1,020,086. PrideBet alone R198,639 (3 invoices overdue).
+MRR: 19 active retainers = R359,764/month base. Plus short-term: The Steam Bar R25,998 (ENDING NOW — 4mo from Jan), Flying Brick R16,998, UDARKIE R14,998, Robin Sprong R13,999. BREAK-EVEN: fixed costs ~R343,858/mo — buffer only R15,906 (4.4%). Losing 1 mid-size client goes negative.
+CHURN: 2025 MRR R381,909 → 2026 R359,764 (-R22,145/mo). Churned: Luxity R41K, Piffany R25K, African Jacquard R15K, ECape Moringa R10K + 5 others. AT-RISK: 9 clients on 3-4 month contracts = R196,949 MRR at risk. Key anchors: Ergonomicsdirect (24-month) and Chin & Partners (21-month).
+MAY BUDGET VARIANCE: Paid media contractors under budget by R6,210. Management fees R26,828 and commissions R8,130 were unbudgeted overages. Software R27,834.
+LTV metrics: avg customer value R17,131/month | avg lifespan 6.9 months | LTV R118,603.`,
   };
 
   return (
@@ -117,34 +142,46 @@ export default function FinancePage() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* ── Alert Banners ── */}
+
+        {/* ── Section 1: Alert Banners ── */}
         <div className="space-y-2">
-          <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3.5">
-            <TrendingDown size={15} className="text-red-400 shrink-0" />
+          {/* Revenue below forecast (not a loss — this is correct) */}
+          <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3.5">
+            <AlertTriangle size={15} className="text-amber-400 shrink-0" />
             <div>
-              <p className="text-red-300 font-medium text-sm">May net loss detected</p>
-              <p className="text-red-400/70 text-xs mt-0.5">
-                Expenses exceeded revenue by R25,296 — first loss month of 2026. Expenses up 6.1% while revenue fell 6.6% MoM.
+              <p className="text-amber-300 font-medium text-sm">May revenue below forecast by R17,236</p>
+              <p className="text-amber-400/70 text-xs mt-0.5">
+                Retainer revenue R367,764 vs R385,000 forecast (-4.5%). Total income R501,116 including VAT refunds and media pass-throughs. Net profit: <span className="text-emerald-400 font-medium">R108,056</span>.
               </p>
             </div>
           </div>
+          {/* Annual target at risk */}
+          <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3.5">
+            <AlertTriangle size={15} className="text-amber-400 shrink-0" />
+            <p className="text-amber-300 text-sm">
+              <span className="font-medium">Annual target at risk — R307K behind YTD forecast after 5 months</span>
+              <span className="text-amber-400/70 ml-1">R1.72M of R2.03M YTD target achieved (84.9%). Annual target: R5.03M.</span>
+            </p>
+          </div>
+          {/* Receivables overdue */}
           <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3.5">
             <AlertTriangle size={15} className="text-amber-400 shrink-0" />
             <p className="text-amber-300 text-sm">
               <span className="font-medium">96% of receivables overdue</span>
-              <span className="text-amber-400/70 ml-1">— R1.24M at risk across 49 invoices. Immediate follow-up required.</span>
+              <span className="text-amber-400/70 ml-1">— R1.25M at risk across 49 invoices. PrideBet alone R198,639 (3 invoices). Immediate follow-up required.</span>
             </p>
           </div>
+          {/* Liquidity warning */}
           <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3.5">
             <AlertTriangle size={15} className="text-amber-400 shrink-0" />
             <p className="text-amber-300 text-sm">
               <span className="font-medium">Current ratio 0.60</span>
-              <span className="text-amber-400/70 ml-1">— Liquidity warning. Current liabilities exceed current assets by R859K.</span>
+              <span className="text-amber-400/70 ml-1">— Liquidity warning. Current liabilities exceed current assets by R859K. Working capital: R384K.</span>
             </p>
           </div>
         </div>
 
-        {/* ── KPI Strip ── */}
+        {/* ── Section 2: KPI Strip ── */}
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
           {/* Cash Balance */}
           <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4">
@@ -171,27 +208,30 @@ export default function FinancePage() {
           {/* YTD Revenue */}
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
             <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">YTD Revenue</p>
-            <p className="text-white text-2xl font-semibold leading-none">R1.72M</p>
+            <p className="text-white text-2xl font-semibold leading-none">{fmt(YTD_RETAINER)}</p>
             <div className="flex items-center gap-1 mt-1.5">
-              <ArrowUpRight size={12} className="text-emerald-400" />
-              <p className="text-emerald-400 text-xs">Jan–May 2026</p>
+              <ArrowDownRight size={12} className="text-amber-400" />
+              <p className="text-amber-400 text-xs">vs target {fmt(YTD_TARGET)} | -15.1%</p>
             </div>
           </div>
 
           {/* Net Profit May */}
-          <div className="bg-red-500/[0.06] border border-red-500/20 rounded-xl p-4">
+          <div className="bg-emerald-500/[0.06] border border-emerald-500/20 rounded-xl p-4">
             <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Net Profit (May)</p>
-            <p className="text-red-400 text-2xl font-semibold leading-none">−R25K</p>
-            <span className="inline-block mt-1.5 text-[10px] font-semibold bg-red-500/20 text-red-300 border border-red-500/30 rounded px-1.5 py-0.5">
-              Loss
+            <p className="text-emerald-400 text-2xl font-semibold leading-none">R108K</p>
+            <span className="inline-block mt-1.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded px-1.5 py-0.5">
+              Profitable
             </span>
           </div>
 
-          {/* Receivables */}
+          {/* MRR Base */}
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Receivables</p>
-            <p className="text-white text-2xl font-semibold leading-none">R1.28M</p>
-            <p className="text-red-400 text-xs mt-1.5 font-medium">R1.24M overdue</p>
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">MRR Base</p>
+            <p className="text-white text-2xl font-semibold leading-none">R359K</p>
+            <div className="flex items-center gap-1 mt-1.5">
+              <TrendingUp size={11} className="text-white/40" />
+              <p className="text-white/40 text-xs">19 active retainers</p>
+            </div>
           </div>
 
           {/* Working Capital */}
@@ -202,31 +242,27 @@ export default function FinancePage() {
           </div>
         </div>
 
-        {/* ── Charts + Receivables ── */}
-        <div className="grid grid-cols-5 gap-5">
-          {/* Left col — trend charts */}
-          <div className="col-span-5 lg:col-span-3 space-y-4">
-            <RevExpChart />
-            <ProfitBarChart />
-          </div>
-
-          {/* Right col — receivables */}
-          <div className="col-span-5 lg:col-span-2">
-            <ReceivablesPanel />
-          </div>
+        {/* ── Section 3: Charts — Rev/Exp | Forecast vs Actual ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <RevExpChart />
+          <ForecastVsActual />
         </div>
 
-        {/* ── Client Retainer Board ── */}
+        {/* ── Section 4: Profit Bar | Break-even | Churn Analysis ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <ProfitBarChart />
+          <BreakEven />
+          <ChurnAnalysis />
+        </div>
+
+        {/* ── Section 5: Client Retainer Board (full width) ── */}
         <ClientRetainerBoard />
 
-        {/* ── Cash Flow Calendar + Expense Breakdown ── */}
-        <div className="grid grid-cols-5 gap-5">
-          <div className="col-span-5 lg:col-span-3">
-            <CashFlowCalendar />
-          </div>
-          <div className="col-span-5 lg:col-span-2">
-            <ExpenseBreakdown />
-          </div>
+        {/* ── Section 6: Cash Flow Calendar | Expense Breakdown | Receivables ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <CashFlowCalendar />
+          <ExpenseBreakdown />
+          <ReceivablesPanel />
         </div>
 
         {/* ── Balance Sheet Summary ── */}
@@ -238,7 +274,7 @@ export default function FinancePage() {
               label="Total Liabilities"
               value={fmt(d.position.total_liabilities)}
               trend="down"
-              sub="vs R311K at Dec 2025"
+              sub="Current liabilities R2.14M"
             />
             <KPICard
               label="Net Equity"
@@ -246,15 +282,15 @@ export default function FinancePage() {
               trend={d.position.net_equity > 0 ? "up" : "down"}
             />
             <KPICard
-              label="Dec 2025 Op Margin"
-              value="27%"
-              sub="R891K operating profit"
-              trend="up"
+              label="Current Ratio"
+              value="0.60"
+              sub="Warning: below 1.0"
+              trend="down"
             />
           </div>
         </div>
 
-        {/* ── AI Financial Advisor ── */}
+        {/* ── Section 7: AI Financial Advisor (full width) ── */}
         <div style={{ height: 580 }}>
           <AIAdvisor financialData={enrichedData} />
         </div>

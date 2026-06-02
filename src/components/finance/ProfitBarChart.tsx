@@ -1,14 +1,15 @@
 "use client";
 
 import {
-  BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Cell,
   ReferenceLine,
+  Legend,
 } from "recharts";
 
 function fmt(n: number) {
@@ -17,20 +18,24 @@ function fmt(n: number) {
   return `R${n.toFixed(0)}`;
 }
 
+// All months profitable once other income (VAT refunds, media) is included
 const data = [
-  { month: "Jan", profit: 2852 },
-  { month: "Feb", profit: 24785 },
-  { month: "Mar", profit: 96463 },
-  { month: "Apr", profit: 23493 },
-  { month: "May", profit: -25296 },
+  { month: "Jan", profit: 2852, forecast: 19906 },
+  { month: "Feb", profit: 24785, forecast: 19906 },
+  { month: "Mar", profit: 96463, forecast: 33775 },
+  { month: "Apr", profit: 23493, forecast: 60675 },
+  { month: "May", profit: 108056, forecast: 86175 },
 ];
 
 export default function ProfitBarChart() {
   return (
     <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
-      <p className="text-white/60 text-xs uppercase tracking-wider mb-4">Monthly Net Profit — Jan–May 2026</p>
-      <ResponsiveContainer width="100%" height={180}>
-        <BarChart data={data} barCategoryGap="35%">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-white/60 text-xs uppercase tracking-wider">Monthly Net Profit — Jan–May 2026</p>
+        <span className="text-[10px] text-emerald-400/70 border border-emerald-500/20 bg-emerald-500/10 rounded px-2 py-0.5">All months profitable</span>
+      </div>
+      <ResponsiveContainer width="100%" height={200}>
+        <ComposedChart data={data} barCategoryGap="35%">
           <XAxis
             dataKey="month"
             tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
@@ -56,12 +61,18 @@ export default function ProfitBarChart() {
             labelStyle={{ color: "rgba(255,255,255,0.6)" }}
             cursor={{ fill: "rgba(255,255,255,0.03)" }}
           />
-          <Bar dataKey="profit" name="Net Profit" radius={[4, 4, 0, 0]}>
-            {data.map((entry, i) => (
-              <Cell key={i} fill={entry.profit >= 0 ? "#34d399" : "#f87171"} />
-            ))}
-          </Bar>
-        </BarChart>
+          <Legend wrapperStyle={{ fontSize: 11, color: "rgba(255,255,255,0.4)", paddingTop: 8 }} />
+          <Bar dataKey="profit" name="Actual Profit" fill="#34d399" radius={[4, 4, 0, 0]} />
+          <Line
+            type="monotone"
+            dataKey="forecast"
+            name="Forecast Profit"
+            stroke="#a78bfa"
+            strokeWidth={1.5}
+            strokeDasharray="4 3"
+            dot={{ r: 3, fill: "#a78bfa", strokeWidth: 0 }}
+          />
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

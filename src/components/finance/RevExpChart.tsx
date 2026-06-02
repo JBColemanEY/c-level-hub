@@ -17,18 +17,19 @@ function fmt(n: number) {
   return `R${n.toFixed(0)}`;
 }
 
+// Total income (retainer + other income: VAT refunds, media pass-throughs, etc.)
 const data = [
-  { month: "Jan", revenue: 263004, expenses: 300161 },
-  { month: "Feb", revenue: 318764, expenses: 318979 },
-  { month: "Mar", revenue: 379801, expenses: 338424 },
-  { month: "Apr", revenue: 393988, expenses: 370495 },
-  { month: "May", revenue: 367764, expenses: 393060 },
+  { month: "Jan", revenue: 303013, expenses: 300161, profit: 2852 },
+  { month: "Feb", revenue: 343764, expenses: 318979, profit: 24785 },
+  { month: "Mar", revenue: 434887, expenses: 338424, profit: 96463 },
+  { month: "Apr", revenue: 393988, expenses: 370495, profit: 23493 },
+  { month: "May", revenue: 501116, expenses: 393060, profit: 108056 },
 ];
 
 export default function RevExpChart() {
   return (
     <div className="bg-white/[0.03] rounded-xl border border-white/[0.06] p-5">
-      <p className="text-white/60 text-xs uppercase tracking-wider mb-4">Revenue vs Expenses — Jan–May 2026</p>
+      <p className="text-white/60 text-xs uppercase tracking-wider mb-4">Total Income vs Expenses — Jan–May 2026</p>
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
@@ -62,7 +63,7 @@ export default function RevExpChart() {
           <Line
             type="monotone"
             dataKey="revenue"
-            name="Revenue"
+            name="Total Income"
             stroke="#8b5cf6"
             strokeWidth={2}
             dot={{ r: 4, fill: "#8b5cf6", strokeWidth: 0 }}
@@ -76,6 +77,16 @@ export default function RevExpChart() {
             strokeWidth={2}
             dot={{ r: 4, fill: "#f97316", strokeWidth: 0 }}
             activeDot={{ r: 6 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="profit"
+            name="Net Profit"
+            stroke="#34d399"
+            strokeWidth={1.5}
+            strokeDasharray="4 3"
+            dot={{ r: 3, fill: "#34d399", strokeWidth: 0 }}
+            activeDot={{ r: 5 }}
           />
         </LineChart>
       </ResponsiveContainer>

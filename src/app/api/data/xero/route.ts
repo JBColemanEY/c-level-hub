@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
-import { xero, getTokens } from "@/lib/xero-oauth";
+import { xero, loadTokens, getTokens } from "@/lib/xero-oauth";
 
 export async function GET() {
-  const tokens = getTokens();
+  // Try memory first, fall back to Supabase
+  let tokens = getTokens();
+  if (!tokens) {
+    tokens = await loadTokens();
+  }
+
   if (!tokens) {
     return NextResponse.json({ error: "Not authenticated with Xero", authUrl: "/api/auth/xero" }, { status: 401 });
   }
@@ -14,10 +19,7 @@ export async function GET() {
     const tenantId = xero.tenants[0]?.tenantId;
     if (!tenantId) throw new Error("No Xero tenant found");
 
-    // Fetch P&L report
     const plResponse = await xero.accountingApi.getReportProfitAndLoss(tenantId);
-
-    // Fetch balance sheet
     const bsResponse = await xero.accountingApi.getReportBalanceSheet(tenantId);
 
     return NextResponse.json({

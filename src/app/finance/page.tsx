@@ -28,27 +28,28 @@ function fmt(n: number) {
 
 interface LiveData {
   xeroConnected: boolean;
+  dataSource: "xero" | "sheets" | "fallback";
   lastUpdated: string;
   cashBalance: number;
   mrrBase: number;
   activeRetainers: number;
+  pausedRetainers: number;
   ytdRevenue: number;
   ytdTarget: number;
-  mayRevenue: number;
-  mayExpenses: number;
-  mayProfit: number;
-  mayMargin: number;
+  currentMonthRevenue: number;
+  currentMonthExpenses: number;
+  currentMonthProfit: number;
+  currentMonthMargin: number;
   workingCapital: number;
   currentRatio: number;
   totalAssets: number;
   totalLiabilities: number;
-  netEquity: number;
   totalOverdue: number;
-  overdueByAge: { current: number; days30: number; days60: number; days90: number; days90plus: number };
+  overdueByAge: { current: number; days1to30: number; days31to60: number; days61to90: number; days90plus: number };
   monthlyData: Array<{ month: string; revenue: number; expenses: number; profit: number; forecast: number }>;
   retainers: Array<{ client: string; value: number; status: string; dueDate: string }>;
-  alerts: Array<{ type: string; message: string; detail: string }>;
-  prevMonthRevenue: number;
+  alerts: Array<{ type: string; title: string; detail: string }>;
+  topDebtors: Array<{ name: string; amount: number; daysOverdue: number }>;
 }
 
 export default function FinancePage() {
@@ -96,7 +97,8 @@ export default function FinancePage() {
   // d is guaranteed non-null after loading
   const d = data!;
   const lastRefreshed = new Date(d.lastUpdated);
-  const momChange = d.prevMonthRevenue > 0 ? ((d.mayRevenue - d.prevMonthRevenue) / d.prevMonthRevenue) * 100 : 0;
+  const prevMonthRevenue = d.monthlyData.length >= 2 ? d.monthlyData[d.monthlyData.length - 2].revenue : 0;
+  const momChange = prevMonthRevenue > 0 ? ((d.currentMonthRevenue - prevMonthRevenue) / prevMonthRevenue) * 100 : 0;
   const ytdPct = d.ytdTarget > 0 ? ((d.ytdRevenue / d.ytdTarget) * 100).toFixed(1) : "0";
 
   return (
@@ -134,7 +136,7 @@ export default function FinancePage() {
             <div key={i} className="flex items-start gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3.5">
               <AlertTriangle size={15} className="text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <p className="text-amber-300 font-medium text-sm">{alert.message}</p>
+                <p className="text-amber-300 font-medium text-sm">{alert.title}</p>
                 {alert.detail && (
                   <p className="text-amber-400/70 text-xs mt-0.5">{alert.detail}</p>
                 )}
@@ -157,8 +159,8 @@ export default function FinancePage() {
 
           {/* Monthly Revenue */}
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Revenue (May)</p>
-            <p className="text-white text-2xl font-semibold leading-none">{fmt(d.mayRevenue)}</p>
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Revenue (Current Month)</p>
+            <p className="text-white text-2xl font-semibold leading-none">{fmt(d.currentMonthRevenue)}</p>
             <div className="flex items-center gap-1 mt-1.5">
               {momChange >= 0 ? (
                 <ArrowUpRight size={12} className="text-emerald-400" />
@@ -183,10 +185,10 @@ export default function FinancePage() {
 
           {/* Net Profit May */}
           <div className="bg-emerald-500/[0.06] border border-emerald-500/20 rounded-xl p-4">
-            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Net Profit (May)</p>
-            <p className="text-emerald-400 text-2xl font-semibold leading-none">{fmt(d.mayProfit)}</p>
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Net Profit (Current Month)</p>
+            <p className="text-emerald-400 text-2xl font-semibold leading-none">{fmt(d.currentMonthProfit)}</p>
             <span className="inline-block mt-1.5 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded px-1.5 py-0.5">
-              {d.mayProfit >= 0 ? "Profitable" : "Loss"}
+              {d.currentMonthProfit >= 0 ? "Profitable" : "Loss"}
             </span>
           </div>
 
@@ -234,7 +236,7 @@ export default function FinancePage() {
 
         {/* ── Balance Sheet Summary ── */}
         <div>
-          <p className="text-white/60 text-xs uppercase tracking-wider mb-3">Balance Sheet — May 2026</p>
+          <p className="text-white/60 text-xs uppercase tracking-wider mb-3">Balance Sheet — Current Month</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <KPICard label="Total Assets" value={fmt(d.totalAssets)} />
             <KPICard
@@ -245,8 +247,8 @@ export default function FinancePage() {
             />
             <KPICard
               label="Net Equity"
-              value={fmt(d.netEquity)}
-              trend={d.netEquity > 0 ? "up" : "down"}
+              value={fmt(d.totalAssets - d.totalLiabilities)}
+              trend={(d.totalAssets - d.totalLiabilities) > 0 ? "up" : "down"}
             />
             <KPICard
               label="Current Ratio"

@@ -14,7 +14,7 @@ import {
 const NAV = [
   { label: "Overview", href: "/", icon: LayoutDashboard },
   { label: "Finance", href: "/finance", icon: TrendingUp, active: true },
-  { label: "Operations", href: "/operations", icon: Settings, soon: true },
+  { label: "Operations", href: "/operations", icon: Settings },
   { label: "Sales & Marketing", href: "/sales", icon: Megaphone, soon: true },
   { label: "People", href: "/people", icon: Users, soon: true },
 ];

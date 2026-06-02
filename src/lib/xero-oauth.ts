@@ -5,7 +5,7 @@ export const xero = new XeroClient({
   clientId: process.env.XERO_CLIENT_ID!,
   clientSecret: process.env.XERO_CLIENT_SECRET!,
   redirectUris: [process.env.XERO_REDIRECT_URI || "https://c-level-hub-rho.vercel.app/api/auth/xero/callback"],
-  scopes: ["openid", "profile", "email", "offline_access", "accounting.transactions", "accounting.contacts", "accounting.reports.read", "accounting.settings.read"],
+  scopes: ["openid", "profile", "email", "offline_access", "accounting.invoices.read", "accounting.contacts.read", "accounting.payments.read", "accounting.reports.balancesheet.read", "accounting.reports.profitandloss.read", "accounting.settings.read"],
 });
 
 // Token store — in production use a DB; for now use env/memory

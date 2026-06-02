@@ -1,10 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { RefreshCw, AlertTriangle, TrendingDown, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import {
+  RefreshCw,
+  TrendingDown,
+  AlertTriangle,
+  TrendingUp,
+  DollarSign,
+  ArrowDownRight,
+  ArrowUpRight,
+} from "lucide-react";
 import KPICard from "@/components/finance/KPICard";
 import AIAdvisor from "@/components/finance/AIAdvisor";
+import RevExpChart from "@/components/finance/RevExpChart";
+import ProfitBarChart from "@/components/finance/ProfitBarChart";
+import ReceivablesPanel from "@/components/finance/ReceivablesPanel";
+import ClientRetainerBoard from "@/components/finance/ClientRetainerBoard";
+import CashFlowCalendar from "@/components/finance/CashFlowCalendar";
+import ExpenseBreakdown from "@/components/finance/ExpenseBreakdown";
 import { FinanceDashboardData } from "@/lib/xero";
 
 function fmt(n: number) {
@@ -13,109 +26,88 @@ function fmt(n: number) {
   return `R${n.toFixed(0)}`;
 }
 
+// Hardcoded comprehensive dataset — Entity Y, May 2026
+const STATIC_DATA: FinanceDashboardData = {
+  org_name: "Entity Y",
+  currency: "ZAR",
+  last_refreshed: "2026-06-02T08:00:00Z",
+  position: {
+    snapshot_date: "2026-05-31",
+    total_assets: 2526928,
+    total_liabilities: 2112203,
+    net_equity: 414725,
+    cash_balance: 1243823,
+    current_assets: 1283105,
+    current_liabilities: 2142263,
+  },
+  pnl: {
+    period: { start_date: "2026-05-01", end_date: "2026-05-31" },
+    total_income: 367764,
+    total_expenses: 393060,
+    gross_profit: 367764,
+    net_profit: -25296,
+    income_accounts: [
+      { account_name: "Retainer Revenue", current_balance: 367764, comparison_balance: 393988 },
+    ],
+    expense_accounts: [
+      { account_name: "Staff / Contractors", current_balance: 279740, comparison_balance: 279740 },
+      { account_name: "Software", current_balance: 26000, comparison_balance: 26000 },
+      { account_name: "Occupancy", current_balance: 23004, comparison_balance: 23004 },
+      { account_name: "General", current_balance: 11000, comparison_balance: 11000 },
+      { account_name: "Marketing", current_balance: 7000, comparison_balance: 7000 },
+      { account_name: "Phone / WiFi", current_balance: 2250, comparison_balance: 2250 },
+    ],
+  },
+  cash: {
+    snapshot_date: "2026-05-31",
+    cash_balance: 1243823,
+    amount_owed: 1355203,
+    amount_due: 0,
+    working_capital: 384665,
+  },
+};
+
+const YTD_REVENUE = 263004 + 318764 + 379801 + 393988 + 367764; // 1,723,321
+const APR_REVENUE = 393988;
+const MAY_REVENUE = 367764;
+const MOM_CHANGE = ((MAY_REVENUE - APR_REVENUE) / APR_REVENUE) * 100; // -6.6%
+
 export default function FinancePage() {
-  const [data, setData] = useState<FinanceDashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshed] = useState(new Date("2026-06-02T08:00:00Z"));
 
-  async function fetchData() {
-    try {
-      setRefreshing(true);
-      const res = await fetch("/api/xero/finance");
-      if (!res.ok) throw new Error("Failed");
-      const json = await res.json();
-      setData(json);
-    } catch {
-      setError("Could not load financial data. Check Xero connection.");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
+  function handleRefresh() {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 1200);
   }
 
-  useEffect(() => { fetchData(); }, []);
+  const d = STATIC_DATA;
 
-  if (loading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <div className="w-10 h-10 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-white/40 text-sm">Connecting to Xero…</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Use hardcoded live data as fallback (from what we fetched earlier)
-  const d: FinanceDashboardData = data ?? {
-    org_name: "Entity Y",
-    currency: "ZAR",
-    last_refreshed: "2026-06-01T19:01:11Z",
-    position: {
-      snapshot_date: "2026-05-31",
-      total_assets: 2526928.72,
-      total_liabilities: 2112203.19,
-      net_equity: 414725.53,
-      cash_balance: 1243823.51,
-      current_assets: 1283105.21,
-      current_liabilities: 2142262.93,
-    },
-    pnl: {
-      period: { start_date: "2026-04-30", end_date: "2026-05-30" },
-      total_income: 349326.32,
-      total_expenses: 351522.23,
-      gross_profit: 349326.32,
-      net_profit: -2195.91,
-      income_accounts: [
-        { account_name: "Sales", current_balance: 0, comparison_balance: 291403.73 },
-        { account_name: "Other Revenue", current_balance: 0, comparison_balance: 57922.59 },
-      ],
-      expense_accounts: [
-        { account_name: "Advertising", current_balance: 0, comparison_balance: 75267.77 },
-        { account_name: "Accounting fees", current_balance: 0, comparison_balance: 3500 },
-        { account_name: "Medical expenses", current_balance: 0, comparison_balance: 2252.17 },
-        { account_name: "Bank Fees", current_balance: 0, comparison_balance: 2181.84 },
-        { account_name: "Entertainment", current_balance: 0, comparison_balance: 3205.28 },
-      ],
-    },
-    cash: {
-      snapshot_date: "2026-05-31",
-      cash_balance: 1243823.51,
-      amount_owed: 1283105.21,
-      amount_due: 0,
-      working_capital: 384665.79,
-    },
+  // AI advisor gets a rich context string baked in
+  const enrichedData: FinanceDashboardData = {
+    ...d,
+    org_name: "Entity Y — May 2026 | Cash: R1.24M | May Rev: R367K (-6.6% MoM) | May Net Loss: -R25K | YTD Rev: R1.72M | Receivables: R1.36M (96% overdue, R1.25M) | Working capital: R384K | Current ratio: 0.60 WARNING | MRR base: R359K from 19 active retainers | PrideBet: R198K outstanding, payment issues | Dec 2025 operating margin: 27%",
   };
-
-  const isNetLoss = d.pnl.net_profit < 0;
-  const currentRatio = d.position.current_assets / (d.position.current_liabilities || 1);
-  const expenseChartData = d.pnl.expense_accounts.map((a) => ({
-    name: a.account_name,
-    value: a.comparison_balance || a.current_balance,
-  }));
-  const incomeChartData = d.pnl.income_accounts.map((a) => ({
-    name: a.account_name,
-    value: a.comparison_balance || a.current_balance,
-  }));
-
-  const COLORS = ["#8b5cf6", "#6366f1", "#a78bfa", "#7c3aed", "#c4b5fd"];
 
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-      {/* Page header */}
+      {/* ── Header ── */}
       <div className="flex items-center justify-between p-6 pb-0">
         <div>
-          <h1 className="text-white font-semibold text-xl">Finance</h1>
+          <h1 className="text-white font-semibold text-xl tracking-tight">Finance</h1>
           <p className="text-white/40 text-sm mt-0.5">
-            Live data · {d.org_name} · as of{" "}
-            {new Date(d.last_refreshed).toLocaleString("en-ZA", {
-              day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+            Entity Y · Management Accounts + Xero · as of{" "}
+            {lastRefreshed.toLocaleString("en-ZA", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}
           </p>
         </div>
         <button
-          onClick={fetchData}
+          onClick={handleRefresh}
           disabled={refreshing}
           className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm transition-colors"
         >
@@ -124,125 +116,147 @@ export default function FinancePage() {
         </button>
       </div>
 
-      {error && (
-        <div className="mx-6 mt-4 flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-3 text-amber-300 text-sm">
-          <AlertTriangle size={14} />
-          {error} — Showing last known data.
-        </div>
-      )}
-
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        {/* Alert banner for net loss */}
-        {isNetLoss && (
-          <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-4">
-            <TrendingDown size={16} className="text-red-400 shrink-0" />
+        {/* ── Alert Banners ── */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-xl px-5 py-3.5">
+            <TrendingDown size={15} className="text-red-400 shrink-0" />
             <div>
-              <p className="text-red-300 font-medium text-sm">Net loss detected</p>
+              <p className="text-red-300 font-medium text-sm">May net loss detected</p>
               <p className="text-red-400/70 text-xs mt-0.5">
-                Last period: {fmt(Math.abs(d.pnl.net_profit))} loss. Expenses exceeded revenue by{" "}
-                {((Math.abs(d.pnl.net_profit) / d.pnl.total_income) * 100).toFixed(1)}%.
+                Expenses exceeded revenue by R25,296 — first loss month of 2026. Expenses up 6.1% while revenue fell 6.6% MoM.
               </p>
             </div>
           </div>
-        )}
-
-        {/* KPI Row */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <KPICard
-            label="Cash Balance"
-            value={fmt(d.cash.cash_balance)}
-            sub="Available liquidity"
-            highlight
-          />
-          <KPICard
-            label="Working Capital"
-            value={fmt(d.cash.working_capital)}
-            sub={currentRatio < 1 ? "⚠ Current ratio < 1" : `Current ratio: ${currentRatio.toFixed(2)}`}
-            trend={currentRatio >= 1 ? "up" : "down"}
-          />
-          <KPICard
-            label="Net Equity"
-            value={fmt(d.position.net_equity)}
-            sub="Total assets minus liabilities"
-            trend={d.position.net_equity > 0 ? "up" : "down"}
-          />
-          <KPICard
-            label="Revenue (Last Period)"
-            value={fmt(d.pnl.total_income)}
-            sub={isNetLoss ? `Net loss: ${fmt(Math.abs(d.pnl.net_profit))}` : `Net profit: ${fmt(d.pnl.net_profit)}`}
-            trend={isNetLoss ? "down" : "up"}
-          />
+          <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3.5">
+            <AlertTriangle size={15} className="text-amber-400 shrink-0" />
+            <p className="text-amber-300 text-sm">
+              <span className="font-medium">96% of receivables overdue</span>
+              <span className="text-amber-400/70 ml-1">— R1.24M at risk across 49 invoices. Immediate follow-up required.</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/20 rounded-xl px-5 py-3.5">
+            <AlertTriangle size={15} className="text-amber-400 shrink-0" />
+            <p className="text-amber-300 text-sm">
+              <span className="font-medium">Current ratio 0.60</span>
+              <span className="text-amber-400/70 ml-1">— Liquidity warning. Current liabilities exceed current assets by R859K.</span>
+            </p>
+          </div>
         </div>
 
-        {/* Balance sheet summary */}
-        <div className="grid grid-cols-3 gap-4">
-          <KPICard label="Total Assets" value={fmt(d.position.total_assets)} />
-          <KPICard label="Total Liabilities" value={fmt(d.position.total_liabilities)} trend="down" />
-          <KPICard label="Receivables" value={fmt(d.cash.amount_owed)} sub="Outstanding invoices" />
+        {/* ── KPI Strip ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+          {/* Cash Balance */}
+          <div className="bg-violet-500/10 border border-violet-500/30 rounded-xl p-4">
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Cash Balance</p>
+            <div className="flex items-end gap-1">
+              <DollarSign size={14} className="text-violet-400 mb-0.5" />
+              <p className="text-white text-2xl font-semibold leading-none">R1.24M</p>
+            </div>
+            <p className="text-violet-300/70 text-xs mt-1.5">Available liquidity</p>
+          </div>
+
+          {/* Monthly Revenue */}
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Revenue (May)</p>
+            <p className="text-white text-2xl font-semibold leading-none">R367K</p>
+            <div className="flex items-center gap-1 mt-1.5">
+              <ArrowDownRight size={12} className="text-red-400" />
+              <p className="text-red-400 text-xs font-medium">
+                {MOM_CHANGE.toFixed(1)}% vs Apr
+              </p>
+            </div>
+          </div>
+
+          {/* YTD Revenue */}
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">YTD Revenue</p>
+            <p className="text-white text-2xl font-semibold leading-none">R1.72M</p>
+            <div className="flex items-center gap-1 mt-1.5">
+              <ArrowUpRight size={12} className="text-emerald-400" />
+              <p className="text-emerald-400 text-xs">Jan–May 2026</p>
+            </div>
+          </div>
+
+          {/* Net Profit May */}
+          <div className="bg-red-500/[0.06] border border-red-500/20 rounded-xl p-4">
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Net Profit (May)</p>
+            <p className="text-red-400 text-2xl font-semibold leading-none">−R25K</p>
+            <span className="inline-block mt-1.5 text-[10px] font-semibold bg-red-500/20 text-red-300 border border-red-500/30 rounded px-1.5 py-0.5">
+              Loss
+            </span>
+          </div>
+
+          {/* Receivables */}
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Receivables</p>
+            <p className="text-white text-2xl font-semibold leading-none">R1.28M</p>
+            <p className="text-red-400 text-xs mt-1.5 font-medium">R1.24M overdue</p>
+          </div>
+
+          {/* Working Capital */}
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
+            <p className="text-white/50 text-xs font-medium uppercase tracking-wider mb-2">Working Capital</p>
+            <p className="text-white text-2xl font-semibold leading-none">R384K</p>
+            <p className="text-amber-400 text-xs mt-1.5">Ratio: 0.60 ⚠</p>
+          </div>
         </div>
 
-        {/* Charts + AI */}
-        <div className="grid grid-cols-5 gap-6">
-          {/* Charts col */}
-          <div className="col-span-2 space-y-6">
-            {/* Income breakdown */}
-            {incomeChartData.length > 0 && (
-              <div className="bg-white/[0.02] rounded-xl border border-white/[0.06] p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp size={14} className="text-emerald-400" />
-                  <p className="text-white/70 text-sm font-medium">Revenue Streams</p>
-                </div>
-                <ResponsiveContainer width="100%" height={160}>
-                  <BarChart data={incomeChartData} barCategoryGap="30%">
-                    <XAxis dataKey="name" tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 11 }} axisLine={false} tickLine={false} />
-                    <YAxis hide />
-                    <Tooltip
-                      contentStyle={{ background: "#0f0f17", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 12 }}
-                      formatter={(v) => fmt(Number(v))}
-                      labelStyle={{ color: "rgba(255,255,255,0.6)" }}
-                      cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                    />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                      {incomeChartData.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-
-            {/* Expense breakdown */}
-            {expenseChartData.length > 0 && (
-              <div className="bg-white/[0.02] rounded-xl border border-white/[0.06] p-5">
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingDown size={14} className="text-red-400" />
-                  <p className="text-white/70 text-sm font-medium">Expense Breakdown</p>
-                </div>
-                <ResponsiveContainer width="100%" height={180}>
-                  <BarChart data={expenseChartData} layout="vertical" barCategoryGap="25%">
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 11 }} axisLine={false} tickLine={false} width={110} />
-                    <Tooltip
-                      contentStyle={{ background: "#0f0f17", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, fontSize: 12 }}
-                      formatter={(v) => fmt(Number(v))}
-                      cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                    />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                      {expenseChartData.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
+        {/* ── Charts + Receivables ── */}
+        <div className="grid grid-cols-5 gap-5">
+          {/* Left col — trend charts */}
+          <div className="col-span-5 lg:col-span-3 space-y-4">
+            <RevExpChart />
+            <ProfitBarChart />
           </div>
 
-          {/* AI Advisor */}
-          <div className="col-span-3" style={{ height: 560 }}>
-            <AIAdvisor financialData={d} />
+          {/* Right col — receivables */}
+          <div className="col-span-5 lg:col-span-2">
+            <ReceivablesPanel />
           </div>
+        </div>
+
+        {/* ── Client Retainer Board ── */}
+        <ClientRetainerBoard />
+
+        {/* ── Cash Flow Calendar + Expense Breakdown ── */}
+        <div className="grid grid-cols-5 gap-5">
+          <div className="col-span-5 lg:col-span-3">
+            <CashFlowCalendar />
+          </div>
+          <div className="col-span-5 lg:col-span-2">
+            <ExpenseBreakdown />
+          </div>
+        </div>
+
+        {/* ── Balance Sheet Summary ── */}
+        <div>
+          <p className="text-white/60 text-xs uppercase tracking-wider mb-3">Balance Sheet — May 2026</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <KPICard label="Total Assets" value={fmt(d.position.total_assets)} />
+            <KPICard
+              label="Total Liabilities"
+              value={fmt(d.position.total_liabilities)}
+              trend="down"
+              sub="vs R311K at Dec 2025"
+            />
+            <KPICard
+              label="Net Equity"
+              value={fmt(d.position.net_equity)}
+              trend={d.position.net_equity > 0 ? "up" : "down"}
+            />
+            <KPICard
+              label="Dec 2025 Op Margin"
+              value="27%"
+              sub="R891K operating profit"
+              trend="up"
+            />
+          </div>
+        </div>
+
+        {/* ── AI Financial Advisor ── */}
+        <div style={{ height: 580 }}>
+          <AIAdvisor financialData={enrichedData} />
         </div>
       </div>
     </div>

@@ -1,65 +1,86 @@
-import Image from "next/image";
+import Link from "next/link";
+import { TrendingUp, Settings, Megaphone, Users, ArrowRight } from "lucide-react";
+
+const MODULES = [
+  {
+    label: "Finance",
+    description: "P&L, cash flow, balance sheet · AI-powered CFO insights",
+    href: "/finance",
+    icon: TrendingUp,
+    color: "from-violet-500 to-indigo-600",
+    live: true,
+  },
+  {
+    label: "Operations",
+    description: "Projects, capacity, delivery performance",
+    href: "/operations",
+    icon: Settings,
+    color: "from-slate-500 to-slate-700",
+    live: false,
+  },
+  {
+    label: "Sales & Marketing",
+    description: "Pipeline, campaigns, revenue attribution",
+    href: "/sales",
+    icon: Megaphone,
+    color: "from-slate-500 to-slate-700",
+    live: false,
+  },
+  {
+    label: "People",
+    description: "Team, performance, culture",
+    href: "/people",
+    icon: Users,
+    color: "from-slate-500 to-slate-700",
+    live: false,
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="flex-1 flex flex-col p-8">
+      <div className="mb-10">
+        <h1 className="text-3xl font-semibold text-white">Good morning, Entity Y.</h1>
+        <p className="text-white/40 mt-2">Your C-Suite Hub — every department, one view.</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 max-w-3xl">
+        {MODULES.map(({ label, description, href, icon: Icon, color, live }) => (
+          <Link
+            key={label}
+            href={live ? href : "#"}
+            className={`group relative rounded-2xl border p-6 transition-all ${
+              live
+                ? "border-white/10 hover:border-violet-500/40 bg-white/[0.02] hover:bg-white/[0.04] cursor-pointer"
+                : "border-white/[0.04] bg-white/[0.01] cursor-not-allowed opacity-50"
+            }`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-4`}>
+              <Icon size={18} className="text-white" />
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-white font-medium">{label}</p>
+              {live && (
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded-full">
+                  Live
+                </span>
+              )}
+              {!live && (
+                <span className="text-[10px] bg-white/5 text-white/30 border border-white/10 px-1.5 py-0.5 rounded-full">
+                  Coming soon
+                </span>
+              )}
+            </div>
+            <p className="text-white/40 text-sm">{description}</p>
+            {live && (
+              <ArrowRight
+                size={16}
+                className="absolute top-6 right-6 text-white/20 group-hover:text-violet-400 transition-colors"
+              />
+            )}
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }
